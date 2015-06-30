@@ -76,6 +76,7 @@ else
 endif
 #############################################################
 ESPTOOL ?= ../tools/esptool.py
+MAKEIMG ?= python ../tools/makeimg.py
 
 
 CSRCS ?= $(wildcard *.c)
@@ -156,6 +157,7 @@ endef
 $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	@mkdir -p $(BINODIR)
 	$(ESPTOOL) elf2image $< -o $(FIRMWAREDIR)
+	$(MAKEIMG) $(FIRMWAREDIR)0x00000.bin $(FIRMWAREDIR)0x10000.bin $(FIRMWAREDIR)firmware-combined.bin
 
 #############################################################
 # Rules base

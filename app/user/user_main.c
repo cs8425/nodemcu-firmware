@@ -51,7 +51,7 @@ void task_init(void){
 void nodemcu_init(void)
 {
     NODE_ERR("\n");
-    // Initialize platform first for lua modules.   
+    // Initialize platform first for lua modules.
     if( platform_init() != PLATFORM_OK )
     {
         // This should never happen
@@ -85,7 +85,7 @@ void nodemcu_init(void)
         // Flash init data at FLASHSIZE - 0x04000 Byte.
         flash_init_data_default();
         // Flash blank data at FLASHSIZE - 0x02000 Byte.
-        flash_init_data_blank(); 
+        flash_init_data_blank();
     }
 
 #if defined( BUILD_WOFS )
@@ -133,13 +133,14 @@ void user_init(void)
 #ifdef DEVELOP_VERSION
     uart_init(BIT_RATE_74880, BIT_RATE_74880);
 #else
-    uart_init(BIT_RATE_9600, BIT_RATE_9600);
+    //uart_init(BIT_RATE_9600, BIT_RATE_9600);
+    uart_init(BIT_RATE_115200, BIT_RATE_115200);
 #endif
     // uart_init(BIT_RATE_115200, BIT_RATE_115200);
-    
+
     #ifndef NODE_DEBUG
     system_set_os_print(0);
     #endif
-    
+
     system_init_done_cb(nodemcu_init);
 }

@@ -414,6 +414,70 @@ static int node_setcpufreq(lua_State* L)
   return 1;
 }
 
+#ifdef LUA_NUMBER_INTEGRAL
+
+static int math_random (lua_State *L) {
+  lua_Number r = (lua_Number)(rand() & RAND_MAX);
+
+  switch (lua_gettop(L)) {  /* check number of arguments */
+    case 0: {  /* no arguments */
+      lua_pushnumber(L, r);  /* Number between 0 and 1 - raw data */
+      break;
+    }
+    case 1: {  /* only upper limit */
+      int u = luaL_checkint(L, 1);
+      luaL_argcheck(L, 1<=u, 1, "interval is empty");
+      lua_pushnumber(L, (r % u)+1);  /* int between 1 and `u' */
+      break;
+    }
+    case 2: {  /* lower and upper limits */
+      int l = luaL_checkint(L, 1);
+      int u = luaL_checkint(L, 2);
+      luaL_argcheck(L, l<=u, 2, "interval is empty");
+      lua_pushnumber(L, (r%(u-l+1))+l);  /* int between `l' and `u' */
+      break;
+    }
+    default: return luaL_error(L, "wrong number of arguments");
+  }
+  return 1;
+}
+
+#else
+
+static int math_random (lua_State *L) {
+  /* the `%' avoids the (rare) case of r==1, and is needed also because on
+     some systems (SunOS!) `rand()' may return a value larger than RAND_MAX */
+  lua_Number r = (lua_Number)(rand()%RAND_MAX) / (lua_Number)RAND_MAX;
+  switch (lua_gettop(L)) {  /* check number of arguments */
+    case 0: {  /* no arguments */
+      lua_pushnumber(L, r);  /* Number between 0 and 1 */
+      break;
+    }
+    case 1: {  /* only upper limit */
+      int u = luaL_checkint(L, 1);
+      luaL_argcheck(L, 1<=u, 1, "interval is empty");
+      lua_pushnumber(L, floor(r*u)+1);  /* int between 1 and `u' */
+      break;
+    }
+    case 2: {  /* lower and upper limits */
+      int l = luaL_checkint(L, 1);
+      int u = luaL_checkint(L, 2);
+      luaL_argcheck(L, l<=u, 2, "interval is empty");
+      lua_pushnumber(L, floor(r*(u-l+1))+l);  /* int between `l' and `u' */
+      break;
+    }
+    default: return luaL_error(L, "wrong number of arguments");
+  }
+  return 1;
+}
+
+#endif
+
+static int math_randomseed (lua_State *L) {
+  srand(luaL_checkint(L, 1));
+  return 0;
+}
+
 // Module function map
 #define MIN_OPT_LEVEL 2
 #include "lrodefs.h"
@@ -432,12 +496,14 @@ const LUA_REG_TYPE node_map[] =
 #endif
   { LSTRKEY( "input" ), LFUNCVAL( node_input ) },
   { LSTRKEY( "output" ), LFUNCVAL( node_output ) },
-// Moved to adc module, use adc.readvdd33()  
+// Moved to adc module, use adc.readvdd33()
 // { LSTRKEY( "readvdd33" ), LFUNCVAL( node_readvdd33) },
-  { LSTRKEY( "compile" ), LFUNCVAL( node_compile) },
+  { LSTRKEY( "compile" ), LFUNCVAL( node_compile ) },
   { LSTRKEY( "CPU80MHZ" ), LNUMVAL( CPU80MHZ ) },
   { LSTRKEY( "CPU160MHZ" ), LNUMVAL( CPU160MHZ ) },
-  { LSTRKEY( "setcpufreq" ), LFUNCVAL( node_setcpufreq) },
+  { LSTRKEY( "setcpufreq" ), LFUNCVAL( node_setcpufreq ) },
+  { LSTRKEY( "random" ),     LFUNCVAL( math_random )},
+  { LSTRKEY( "randomseed" ), LFUNCVAL( math_randomseed )},
 // Combined to dsleep(us, option)
 // { LSTRKEY( "dsleepsetoption" ), LFUNCVAL( node_deepsleep_setoption) },
 #if LUA_OPTIMIZE_MEMORY > 0
