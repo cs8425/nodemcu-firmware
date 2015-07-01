@@ -5,7 +5,7 @@
 #include "eagle_soc.h"
 #include "c_types.h"
 
-#define RX_BUFF_SIZE    0x800 // 2048
+#define RX_BUFF_SIZE    0x400 // 1024
 #define TX_BUFF_SIZE    100
 
 typedef enum {

@@ -87,16 +87,16 @@ static int uart_on( lua_State* L )
     lua_pop(L, 1);
     return luaL_error( L, "method not supported" );
   }
-  return 0; 
+  return 0;
 }
 
-bool uart0_echo = true;
+bool uart0_echo = false;
 // Lua: actualbaud = setup( id, baud, databits, parity, stopbits, echo )
 static int uart_setup( lua_State* L )
 {
   unsigned id, databits, parity, stopbits, echo = 1;
   u32 baud, res;
-  
+
   id = luaL_checkinteger( L, 1 );
   MOD_CHECK_ID( uart, id );
   baud = luaL_checkinteger( L, 2 );
@@ -123,7 +123,7 @@ static int uart_write( lua_State* L )
   const char* buf;
   size_t len, i;
   int total = lua_gettop( L ), s;
-  
+
   id = luaL_checkinteger( L, 1 );
   MOD_CHECK_ID( uart, id );
   for( s = 2; s <= total; s ++ )
@@ -149,7 +149,7 @@ static int uart_write( lua_State* L )
 // Module function map
 #define MIN_OPT_LEVEL 2
 #include "lrodefs.h"
-const LUA_REG_TYPE uart_map[] = 
+const LUA_REG_TYPE uart_map[] =
 {
   { LSTRKEY( "setup" ),  LFUNCVAL( uart_setup ) },
   { LSTRKEY( "write" ), LFUNCVAL( uart_write ) },
@@ -169,5 +169,5 @@ LUALIB_API int luaopen_uart( lua_State *L )
   // Add constants
 
   return 1;
-#endif // #if LUA_OPTIMIZE_MEMORY > 0  
+#endif // #if LUA_OPTIMIZE_MEMORY > 0
 }

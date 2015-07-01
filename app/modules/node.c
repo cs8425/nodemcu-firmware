@@ -414,8 +414,8 @@ static int node_setcpufreq(lua_State* L)
   return 1;
 }
 
+#ifndef LUA_USE_BUILTIN_MATH
 #ifdef LUA_NUMBER_INTEGRAL
-
 static int math_random (lua_State *L) {
   lua_Number r = (lua_Number)(rand() & RAND_MAX);
 
@@ -477,6 +477,14 @@ static int math_randomseed (lua_State *L) {
   srand(luaL_checkint(L, 1));
   return 0;
 }
+#endif
+
+// Lua: code = bootreason()
+static int node_bootreason (lua_State *L)
+{
+  lua_pushnumber (L, rtc_get_reset_reason ());
+  return 1;
+}
 
 // Module function map
 #define MIN_OPT_LEVEL 2
@@ -502,8 +510,11 @@ const LUA_REG_TYPE node_map[] =
   { LSTRKEY( "CPU80MHZ" ), LNUMVAL( CPU80MHZ ) },
   { LSTRKEY( "CPU160MHZ" ), LNUMVAL( CPU160MHZ ) },
   { LSTRKEY( "setcpufreq" ), LFUNCVAL( node_setcpufreq ) },
-  { LSTRKEY( "random" ),     LFUNCVAL( math_random )},
-  { LSTRKEY( "randomseed" ), LFUNCVAL( math_randomseed )},
+#ifndef LUA_USE_BUILTIN_MATH
+  { LSTRKEY( "random" ),     LFUNCVAL( math_random ) },
+  { LSTRKEY( "randomseed" ), LFUNCVAL( math_randomseed ) },
+#endif
+  { LSTRKEY( "bootreason" ), LFUNCVAL( node_bootreason ) },
 // Combined to dsleep(us, option)
 // { LSTRKEY( "dsleepsetoption" ), LFUNCVAL( node_deepsleep_setoption) },
 #if LUA_OPTIMIZE_MEMORY > 0
